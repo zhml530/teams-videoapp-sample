@@ -8,7 +8,7 @@ export default class WebglVideoFilter {
         this.program = null;
         this.textureY = null;
         this.textureUV = null;
-        this.rgbaPixelBuffer = null;
+        this.effectPixelBuffer = null;
     }
     
     init() {
@@ -58,10 +58,25 @@ export default class WebglVideoFilter {
         );
 
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-        // get canvas output
-        gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, this.rgbaPixelBuffer);
+        gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, this.effectPixelBuffer);
 
-        return this.rgbaPixelBuffer;
+        // color alignment
+        for (let i = 0; i < uOffset; i += 1) {
+            videoFrame.data[i] =pixelsEffectNV12[4 * i];
+        }
+
+        let widthIndex = 0;
+        let curIndex = 0;
+        for (let i = uOffset; i < videoFrame.data.length; i += 2) {
+            videoFrame.data[i] =pixelsEffectNV12[ 4 * curIndex + 1];
+            videoFrame.data[i + 1] =pixelsEffectNV12[4 * curIndex + 2];
+            widthIndex += 2
+            curIndex += 2
+            if (widthIndex > videoFrame.width) {
+                curIndex += videoFrame.width;
+                widthIndex = widthIndex % videoFrame.width;
+            }
+        }
     }
 
     _setSize(width, height) {
@@ -70,7 +85,7 @@ export default class WebglVideoFilter {
             this.canvas.height = height;
             this.canvasWidth = width;
             this.canvasHeight = height;
-            this.rgbaPixelBuffer = new Uint8Array(width * height * 4)
+            this.effectPixelBuffer = new Uint8Array(width * height * 4)
         }
     }
 
@@ -101,9 +116,31 @@ export default class WebglVideoFilter {
                 vec3 rgb = vec3(dot(yuv, yuv2r), dot(yuv, yuv2g), dot(yuv, yuv2b));
                 return rgb; 
             }
+
+            float V(vec3 c) {
+                float result = (0.439 * c.r) - (0.368 * c.g) - (0.071 * c.b) + 0.5;
+                return result;
+            }
+
+            float U(vec3 c) {
+                float result = -(0.148 * c.r) - (0.291 * c.g) + (0.439 * c.b) + 0.5;
+                return result; 
+            }
+
+            float Y(vec3 c) {
+                float result = (0.257 * c.r) + (0.504 * c.g) + (0.098 * c.b) + 0.0625;
+                return result;
+            }
+
             void main() {
                 gl_FragColor = vec4(nv12_to_rgb(v_texCoord), 1); 
-            } 
+                // gray effect
+                float luminance = 0.299 * gl_FragColor.r + 0.587 * texture.g + 0.114 * texture.b;
+                gl_FragColor = vec4(luminance, luminance, luminance, 5);
+
+                // rgba to nv12
+                gl_FragColor = vec4(Y(gl_FragColor.rgb), U(gl_FragColor.rgb), V(gl_FragColor.rgb), 1);
+            }
         `;
         
         let gl = this.gl;
@@ -129,7 +166,7 @@ export default class WebglVideoFilter {
             1, -1, 0, 1.0,  0.0,
             -1, 1, 0, 0.0,  1.0,
             1, 1, 0, 1.0,  1.0,
-         ])
+         ]);
 
         let gl = this.gl;
         let program = this.program;
