@@ -1,4 +1,4 @@
-export default class WebglVideoFilter {
+ class WebglVideoFilter {
     constructor(canvas) {
         this.canvas = canvas;
         this.gl = canvas.getContext('webgl2');

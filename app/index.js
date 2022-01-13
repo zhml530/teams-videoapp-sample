@@ -10,26 +10,20 @@ let appliedEffect = {
 
 // This is the effect linked with UI
 let uiSelectedEffect = {};
-
 let errorOccurs = false;
+const glcanvas = document.querySelector("#glcanvas");
+const gl = glcanvas.getContext("webgl2");
+
+let videoFilter = new WebglVideoFilter(glcanvas);
 //Sample video effect
 function videoFrameHandler(videoFrame, notifyVideoProcessed, notifyError) {
-  const maxLen =
-    (videoFrame.height * videoFrame.width) /
-      Math.max(1, appliedEffect.proportion) - 4;
-
-  for (let i = 1; i < maxLen; i += 4) {
-    //smaple effect just change the value to 100, which effect some pixel value of video frame
-    videoFrame.data[i + 1] = appliedEffect.pixelValue;
-  }
-
+  videoFilter.processVideoFrame(videoFrame);
   //send notification the effect processing is finshed.
   notifyVideoProcessed();
-
-  //send error to Teams
-  if (errorOccurs) {
-    notifyError("some error message");
-  }
+  //send error to Teams if any
+  // if (errorOccurs) {
+  //   notifyError("some error message");
+  // }
 }
 
 function effectParameterChanged(effectName) {
