@@ -203,6 +203,7 @@
 
     _initTexture() {
         let gl = this.gl;
+        let program = this.program;
         this.textureY = this._createTexture();
         gl.uniform1i(gl.getUniformLocation(program, 'u_textureY'), 0);
 
