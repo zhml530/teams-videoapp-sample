@@ -135,7 +135,7 @@
             void main() {
                 gl_FragColor = vec4(nv12_to_rgb(v_texCoord), 1); 
                 // gray effect
-                float luminance = 0.299 * gl_FragColor.r + 0.587 * texture.g + 0.114 * texture.b;
+                float luminance = 0.299 * gl_FragColor.r + 0.587 * gl_FragColor.g + 0.114 * gl_FragColor.b;
                 gl_FragColor = vec4(luminance, luminance, luminance, 5);
 
                 // rgba to nv12
