@@ -62,14 +62,14 @@
 
         // color alignment
         for (let i = 0; i < uOffset; i += 1) {
-            videoFrame.data[i] = effectPixelBuffer[4 * i];
+            videoFrame.data[i] = this.effectPixelBuffer[4 * i];
         }
 
         let widthIndex = 0;
         let curIndex = 0;
         for (let i = uOffset; i < videoFrame.data.length; i += 2) {
-            videoFrame.data[i] = effectPixelBuffer[ 4 * curIndex + 1];
-            videoFrame.data[i + 1] =effectPixelBuffer[4 * curIndex + 2];
+            videoFrame.data[i] = this.effectPixelBuffer[ 4 * curIndex + 1];
+            videoFrame.data[i + 1] = this.effectPixelBuffer[4 * curIndex + 2];
             widthIndex += 2
             curIndex += 2
             if (widthIndex > videoFrame.width) {
