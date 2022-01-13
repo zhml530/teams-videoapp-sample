@@ -144,8 +144,8 @@
         `;
         
         let gl = this.gl;
-        let vertexShader = this.compileShader(vertexShaderSource, gl.VERTEX_SHADER);
-        let fragmentShader = this.compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER);
+        let vertexShader = this._compileShader(vertexShaderSource, gl.VERTEX_SHADER);
+        let fragmentShader = this._compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER);
 
         let program = this.gl.createProgram();
         gl.attachShader(program, vertexShader);
