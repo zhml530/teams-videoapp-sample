@@ -15,6 +15,7 @@ const glcanvas = document.querySelector("#glcanvas");
 const gl = glcanvas.getContext("webgl2");
 
 let videoFilter = new WebglVideoFilter(glcanvas);
+videoFilter.init();
 //Sample video effect
 function videoFrameHandler(videoFrame, notifyVideoProcessed, notifyError) {
   videoFilter.processVideoFrame(videoFrame);
