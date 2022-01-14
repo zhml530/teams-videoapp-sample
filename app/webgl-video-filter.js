@@ -81,8 +81,8 @@
 
     _setSize(width, height) {
         if (this.canvasWidth !== width || this.canvasHeight !== height) {
-            this.canvas.width = width;
-            this.canvas.height = height;
+            // this.canvas.width = width;
+            // this.canvas.height = height;
             this.canvasWidth = width;
             this.canvasHeight = height;
             this.effectPixelBuffer = new Uint8Array(width * height * 4)
@@ -180,7 +180,7 @@
         let indices = new Int16Array([
             0, 1, 2, 
             2, 1, 3
-        ])
+        ]);
         let indicesBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
