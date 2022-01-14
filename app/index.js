@@ -12,7 +12,7 @@ let appliedEffect = {
 let uiSelectedEffect = {};
 let errorOccurs = false;
 let canvas = document.createElement("canvas");
-let videoFilter = new WebglVideoFilter(glcanvas);
+let videoFilter = new WebglVideoFilter(canvas);
 videoFilter.init();
 //Sample video effect
 function videoFrameHandler(videoFrame, notifyVideoProcessed, notifyError) {
