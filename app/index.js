@@ -11,16 +11,16 @@ let appliedEffect = {
 // This is the effect linked with UI
 let uiSelectedEffect = {};
 let errorOccurs = false;
-const glcanvas = document.querySelector("#glcanvas");
-const gl = glcanvas.getContext("webgl2");
-
+let canvas = document.createElement("canvas");
 let videoFilter = new WebglVideoFilter(glcanvas);
 videoFilter.init();
 //Sample video effect
 function videoFrameHandler(videoFrame, notifyVideoProcessed, notifyError) {
   videoFilter.processVideoFrame(videoFrame);
+ 
   //send notification the effect processing is finshed.
   notifyVideoProcessed();
+  
   //send error to Teams if any
   // if (errorOccurs) {
   //   notifyError("some error message");
