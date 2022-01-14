@@ -81,8 +81,8 @@
 
     _setSize(width, height) {
         if (this.canvasWidth !== width || this.canvasHeight !== height) {
-            // this.canvas.width = width;
-            // this.canvas.height = height;
+            this.canvas.width = width;
+            this.canvas.height = height;
             this.canvasWidth = width;
             this.canvasHeight = height;
             this.effectPixelBuffer = new Uint8Array(width * height * 4)
