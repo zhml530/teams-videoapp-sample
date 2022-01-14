@@ -11,7 +11,8 @@ let appliedEffect = {
 // This is the effect linked with UI
 let uiSelectedEffect = {};
 let errorOccurs = false;
-let canvas = document.createElement("canvas");
+// let canvas = document.createElement("canvas");
+let canvas = new OffscreenCanvas();
 let videoFilter = new WebglVideoFilter(canvas);
 videoFilter.init();
 //Sample video effect
