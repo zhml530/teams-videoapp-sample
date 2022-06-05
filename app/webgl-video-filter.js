@@ -72,7 +72,7 @@
         const buf = this.pboBufs[this.pboBufferIndex];
         gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
         gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, 0);
-        gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, effectPixelBuffer);
+        gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, this.effectPixelBuffer);
         // Get the YUV data from the effectPixelBuffer  
         for (let i = 0; i < uOffset; i += 1) {
             videoFrame.data[i] = this.effectPixelBuffer[4 * i];
@@ -103,7 +103,7 @@
             this.effectPixelBuffer = new Uint8Array(width * height * 4);
             const gl = this.gl;
             for (let pboBuf in this.pboBufs) {
-                if(pboBuf) {
+                if(pboBuf !== null) {
                     gl.deleteBuffer(pboBuf);
                 }
             }
