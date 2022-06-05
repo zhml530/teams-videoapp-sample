@@ -10,7 +10,7 @@
         this.textureUV = null;
         this.pboCount = 2;
         this.effectPixelBuffer = null;
-        this.pboBufs = [null,null];
+        this.pboBufs = [];
         this.pboBufferIndex = 0;
     }
     
