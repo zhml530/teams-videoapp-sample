@@ -2,29 +2,30 @@
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.7/MicrosoftTeams.schema.json",
   "manifestVersion": "devPreview",
   "version": "1.0.0",
-  "showLoadingIndicator": true,
-  "id": "b15f97b7-1f9b-4bb7-ac9f-efddf27aae7b",
+  "id": "32cdab16-7c7c-40bc-94ac-c764e91d85a6",
   "packageName": "com.microsoft.teams.videopp",
   "developer": {
-    "name": "Bo Lu",
-    "websiteUrl": "https://github.com/lubobill1990/Teams-VideoApp-example",
-    "privacyUrl": "https://github.com/lubobill1990/Teams-VideoApp-example",
-    "termsOfUseUrl": "https://github.com/lubobill1990/Teams-VideoApp-example"
+    "name": "Microsoft",
+    "websiteUrl": "https://microsoft.github.io/teams-videoapp-sample/",
+    "privacyUrl": "https://privacy.microsoft.com/en-us/privacystatement/",
+    "termsOfUseUrl": "https://www.microsoft.com/en-us/servicesagreement/"
   },
   "icons": {
     "color": "icon-color.png",
     "outline": "icon-outline.png"
   },
   "name": {
-    "short": "Teams VideoApp example",
-    "full": "Teams VideoApp example"
+    "short": "Teams VideoApp sample",
+    "full": "Teams VideoApp sample"
   },
   "description": {
     "short": "This repo demonstrate a minimal Teams video app.",
-    "full": "Clone this repo and change the video frame processing function"
+    "full": "This repo demonstrate a minimal Teams video app, clone this repo and change the video frame processing function"
   },
   "accentColor": "#FFFFFF",
-  "devicePermissions": ["media"],
+  "devicePermissions": [
+		"media"
+	],
   "authorization": {
     "permissions": {
       "resourceSpecific": [
@@ -39,18 +40,23 @@
       ]
     }
   },
-  "validDomains": ["lubobill1990.github.io"],
+  "validDomains": ["microsoft.github.io"],
   "localizationInfo": {
     "defaultLanguageTag": "en-us"
   },
   "meetingExtensionDefinition": {
     "filters": [
       {
-        "id": "f36d7f68-7c71-41f5-8fd9-ebf0ae38f949",
-        "name": "half",
+        "id": "c2cf81fd-a1c0-4742-b41a-ef969b3ed490",
+        "name": "Style_half",
         "thumbnail": "half.png"
+      },
+      {
+        "id": "b0c8896c-7be8-4645-ae02-a8bc9b0355e5",
+        "name": "Style_gray scale",
+        "thumbnail": "gray.png"
       }
     ],
-    "videoAppContentUrl": "https://lubobill1990.github.io/Teams-VideoApp-example/app/index.html"
+    "videoAppContentUrl": "https://microsoft.github.io/teams-videoapp-sample/app/"
   }
 }

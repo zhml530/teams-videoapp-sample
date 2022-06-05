@@ -8,7 +8,10 @@
         this.program = null;
         this.textureY = null;
         this.textureUV = null;
+        this.pboCount = 2;
         this.effectPixelBuffer = null;
+        this.pboBufs = [null,null];
+        this.pboBufferIndex = 0;
     }
     
     init() {
@@ -58,8 +61,18 @@
         );
 
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-        gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, this.effectPixelBuffer);
 
+        let  nextIndex = 0;                  // pbo index used for next frame
+        // increment current index first then get the next index
+        // "index" is used to read pixels from a framebuffer to a PBO
+        // "nextIndex" is used to process pixels in the other PBO
+        this.pboBufferIndex = (this.pboBufferIndex + 1) % 2;
+        nextIndex = (this.pboBufferIndex + 1) % 2;
+
+        const buf = this.pboBufspboIds[this.pboBufferIndex];
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
+        gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, 0);
+        gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, effectPixelBuffer);
         // Get the YUV data from the effectPixelBuffer  
         for (let i = 0; i < uOffset; i += 1) {
             videoFrame.data[i] = this.effectPixelBuffer[4 * i];
@@ -77,6 +90,8 @@
                 widthIndex = widthIndex % videoFrame.width;
             }
         }
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER,  this.pboBufspboIds[nextIndex]);
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
     }
 
     _setSize(width, height) {
@@ -85,7 +100,25 @@
             this.canvas.height = height;
             this.canvasWidth = width;
             this.canvasHeight = height;
-            this.effectPixelBuffer = new Uint8Array(width * height * 4)
+            this.effectPixelBuffer = new Uint8Array(width * height * 4);
+            const gl = this.gl;
+            for (let pboBuf in this.pboBufs) {
+                if(pboBuf) {
+                    gl.deleteBuffer(pboBuf);
+                }
+            }
+
+            // create 2 pixel buffer objects, you need to delete them when program exits.
+            // glBufferData() with NULL pointer reserves only memory space.
+            const buf = gl.createBuffer();
+            gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
+            gl.bufferData(gl.PIXEL_PACK_BUFFER, width * height * 4, gl.STREAM_READ);
+            pboBufs[0] = buf;
+            const buf2 = gl.createBuffer();
+            gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf2);
+            gl.bufferData(gl.PIXEL_PACK_BUFFER, width * height * 4, gl.STREAM_READ);
+            pboBufs[1] = buf2;
+            gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
         }
     }
 
@@ -108,6 +141,7 @@
             vec3 yuv2r = vec3(1.164, 0.0, 1.596);
             vec3 yuv2g = vec3(1.164, -0.391, -0.813);
             vec3 yuv2b = vec3(1.164, 2.018, 0.0);
+
             vec3 nv12_to_rgb(vec2 texCoord) {
                 vec3 yuv; 
                 yuv.x = texture2D(u_samplerY, texCoord).r - 0.0625;
@@ -117,19 +151,11 @@
                 return rgb; 
             }
 
-            float V(vec3 c) {
-                float result = (0.439 * c.r) - (0.368 * c.g) - (0.071 * c.b) + 0.5;
-                return result;
-            }
-
-            float U(vec3 c) {
-                float result = -(0.148 * c.r) - (0.291 * c.g) + (0.439 * c.b) + 0.5;
-                return result; 
-            }
-
-            float Y(vec3 c) {
-                float result = (0.257 * c.r) + (0.504 * c.g) + (0.098 * c.b) + 0.0625;
-                return result;
+            vec4 rgba_to_nv12(vec3 rgb) {
+                float y = (0.257 * rgb.r) + (0.504 * rgb.g) + (0.098 * rgb.b) + 0.0625;
+                float u = -(0.148 * rgb.r) - (0.291 * rgb.g) + (0.439 * rgb.b) + 0.5;
+                float v = (0.439 * rgb.r) - (0.368 * rgb.g) - (0.071 * rgb.b) + 0.5;
+                return vec4(y, u, v, 1.0);
             }
 
             void main() {
@@ -139,7 +165,7 @@
                 gl_FragColor = vec4(luminance, luminance, luminance, 5);
 
                 // rgba to nv12
-                gl_FragColor = vec4(Y(gl_FragColor.rgb), U(gl_FragColor.rgb), V(gl_FragColor.rgb), 1);
+                gl_FragColor = rgba_to_nv12(gl_FragColor.rgb);
             }
         `;
         
@@ -147,7 +173,7 @@
         const vertexShader = this._compileShader(vertexShaderSource, gl.VERTEX_SHADER);
         const fragmentShader = this._compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER);
 
-        const program = this.gl.createProgram();
+        const program = gl.createProgram();
         gl.attachShader(program, vertexShader);
         gl.attachShader(program, fragmentShader);
         gl.linkProgram(program);
@@ -168,7 +194,7 @@
             1, 1, 0, 1.0,  1.0,
          ]);
 
-         const gl = this.gl;
+        const gl = this.gl;
         const program = this.program;
         const verticeBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, verticeBuffer);
@@ -217,7 +243,7 @@
         const shader = gl.createShader(shaderType);
         gl.shaderSource(shader, shaderSource);
         gl.compileShader(shader);
-        const success = gl.getShaderParameter(shader, this.gl.COMPILE_STATUS);
+        const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
         if (!success) {
             const err = gl.getShaderInfoLog(shader);
             gl.deleteShader(shader);
