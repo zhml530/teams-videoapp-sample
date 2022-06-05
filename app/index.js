@@ -1,6 +1,7 @@
 microsoftTeams.initialize(() => {}, [
   "https://microsoft.github.io",
   "https://lubobill1990.github.io",
+  "https://zhml530.github.io"
 ]);
 
 // This is the effect for processing
