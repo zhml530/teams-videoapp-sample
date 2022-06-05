@@ -72,6 +72,11 @@
         const buf = this.pboBufs[this.pboBufferIndex];
         gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
         gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, 0);
+
+        const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+        gl.flush();
+        gl.clientWaitSync(sync, 0, 0);
+        gl.deleteSync(sync);
         gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, this.effectPixelBuffer);
         // Get the YUV data from the effectPixelBuffer  
         for (let i = 0; i < uOffset; i += 1) {
