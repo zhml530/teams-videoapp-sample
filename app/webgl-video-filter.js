@@ -69,7 +69,7 @@
         this.pboBufferIndex = (this.pboBufferIndex + 1) % 2;
         nextIndex = (this.pboBufferIndex + 1) % 2;
 
-        const buf = this.pboBufspboIds[this.pboBufferIndex];
+        const buf = this.pboBufs[this.pboBufferIndex];
         gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
         gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, 0);
         gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, effectPixelBuffer);
@@ -90,7 +90,7 @@
                 widthIndex = widthIndex % videoFrame.width;
             }
         }
-        gl.bindBuffer(gl.PIXEL_PACK_BUFFER,  this.pboBufspboIds[nextIndex]);
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER,  this.pboBufs[nextIndex]);
         gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
     }
 
@@ -113,12 +113,13 @@
             const buf = gl.createBuffer();
             gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
             gl.bufferData(gl.PIXEL_PACK_BUFFER, width * height * 4, gl.STREAM_READ);
-            pboBufs[0] = buf;
+            this.pboBufs[0] = buf;
             const buf2 = gl.createBuffer();
             gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf2);
             gl.bufferData(gl.PIXEL_PACK_BUFFER, width * height * 4, gl.STREAM_READ);
-            pboBufs[1] = buf2;
+            this.pboBufs[1] = buf2;
             gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+            this.pboBufferIndex = 0;
         }
     }
 
