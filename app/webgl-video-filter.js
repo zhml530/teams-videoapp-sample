@@ -8,10 +8,7 @@
         this.program = null;
         this.textureY = null;
         this.textureUV = null;
-        this.pboCount = 2;
         this.effectPixelBuffer = null;
-        this.pboBufs = [];
-        this.pboBufferIndex = 0;
     }
     
     init() {
@@ -61,23 +58,8 @@
         );
 
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, this.effectPixelBuffer);
 
-        let  nextIndex = 0;                  // pbo index used for next frame
-        // increment current index first then get the next index
-        // "index" is used to read pixels from a framebuffer to a PBO
-        // "nextIndex" is used to process pixels in the other PBO
-        this.pboBufferIndex = (this.pboBufferIndex + 1) % 2;
-        nextIndex = (this.pboBufferIndex + 1) % 2;
-
-        const buf = this.pboBufs[this.pboBufferIndex];
-        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
-        gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, 0);
-
-        const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
-        gl.flush();
-        gl.clientWaitSync(sync, 0, 0);
-        gl.deleteSync(sync);
-        gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, this.effectPixelBuffer);
         // Get the YUV data from the effectPixelBuffer  
         for (let i = 0; i < uOffset; i += 1) {
             videoFrame.data[i] = this.effectPixelBuffer[4 * i];
@@ -95,8 +77,6 @@
                 widthIndex = widthIndex % videoFrame.width;
             }
         }
-        gl.bindBuffer(gl.PIXEL_PACK_BUFFER,  this.pboBufs[nextIndex]);
-        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
     }
 
     _setSize(width, height) {
@@ -105,26 +85,7 @@
             this.canvas.height = height;
             this.canvasWidth = width;
             this.canvasHeight = height;
-            this.effectPixelBuffer = new Uint8Array(width * height * 4);
-            const gl = this.gl;
-            for (let pboBuf in this.pboBufs) {
-                if(pboBuf !== null) {
-                    gl.deleteBuffer(pboBuf);
-                }
-            }
-
-            // create 2 pixel buffer objects, you need to delete them when program exits.
-            // glBufferData() with NULL pointer reserves only memory space.
-            const buf = gl.createBuffer();
-            gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
-            gl.bufferData(gl.PIXEL_PACK_BUFFER, width * height * 4, gl.STREAM_READ);
-            this.pboBufs[0] = buf;
-            const buf2 = gl.createBuffer();
-            gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf2);
-            gl.bufferData(gl.PIXEL_PACK_BUFFER, width * height * 4, gl.STREAM_READ);
-            this.pboBufs[1] = buf2;
-            gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
-            this.pboBufferIndex = 0;
+            this.effectPixelBuffer = new Uint8Array(width * height * 4)
         }
     }
 
